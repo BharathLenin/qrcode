@@ -63,7 +63,7 @@ public class Library {
     @CrossOrigin
     @RequestMapping(value = "/getlabel", method = RequestMethod.POST, consumes = "application/json; charset=UTF-8",produces = "application/json; charset=UTF-8")
     
-    public HttpResponse createlabel(@RequestBody Request request) throws DocumentException, IOException {
+    public String createlabel(@RequestBody Request request) throws DocumentException, IOException {
     	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     	Document document = null;
 		document = new Document(PageSize.LETTER.rotate(), 30.0f, 30.0f, 30.0f,
@@ -125,9 +125,10 @@ public class Library {
 					HttpEntity resEntity = POSTresponse.getEntity();
 					EntityUtils.consume(resEntity);
 					} catch (Exception e) {
+						return "pdf not printed";
 					}
 
-		return POSTresponse;
+		return "pdf printed";
 
 
         
