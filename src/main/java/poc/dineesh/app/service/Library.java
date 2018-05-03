@@ -4,6 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -57,11 +58,12 @@ import ai.api.model.AIResponse;
 public class Library {
 	
 	private static Integer BASE_FONT_SIZE = 24;
+	private static String printURL = "http://stuxsh01.stXXXX.homedepot.com:12020/OutputAPI/print/v2";
     
     @CrossOrigin
     @RequestMapping(value = "/getlabel", method = RequestMethod.POST, consumes = "application/json; charset=UTF-8",produces = "application/json; charset=UTF-8")
     
-    public ByteArrayOutputStream createlabel(@RequestBody Request request) throws DocumentException, IOException {
+    public HttpResponse createlabel(@RequestBody Request request) throws DocumentException, IOException {
     	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     	Document document = null;
 		document = new Document(PageSize.LETTER.rotate(), 30.0f, 30.0f, 30.0f,
@@ -106,8 +108,26 @@ public class Library {
 		} finally {
 		    fos.close();
 		}
+		
+		
+		HttpResponse POSTresponse = null;	
 
-		return outputStream;
+		try {
+					HttpClient httpclient = HttpClientBuilder.create().build(); 
+					HttpPost httpPost = new HttpPost(printURL.replace("XXXX", request.getStoreNumber()));
+					ByteArrayBody uploadFilePart = new ByteArrayBody(outputStream.toByteArray(),"autoPalletTagPDF.pdf");
+					StringBody ux_queue_name = new StringBody(request.getPrintQueueName());
+					MultipartEntity reqEntity = new MultipartEntity();
+					reqEntity.addPart("ux_queue_name", ux_queue_name);
+					reqEntity.addPart("file_1", uploadFilePart);
+					httpPost.setEntity(reqEntity);
+					POSTresponse = httpclient.execute(httpPost);
+					HttpEntity resEntity = POSTresponse.getEntity();
+					EntityUtils.consume(resEntity);
+					} catch (Exception e) {
+					}
+
+		return POSTresponse;
 
 
         

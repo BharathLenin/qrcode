@@ -6,6 +6,20 @@ public class Request {
 	public String skuName;
 	public String price;
 	public String skuNumber;
+	public String storeNumber;
+	public String printQueueName;
+	public String getStoreNumber() {
+		return storeNumber;
+	}
+	public void setStoreNumber(String storeNumber) {
+		this.storeNumber = storeNumber;
+	}
+	public String getPrintQueueName() {
+		return printQueueName;
+	}
+	public void setPrintQueueName(String printQueueName) {
+		this.printQueueName = printQueueName;
+	}
 	public String getDepartmentNumber() {
 		return departmentNumber;
 	}
