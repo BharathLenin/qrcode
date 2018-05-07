@@ -8,6 +8,13 @@ import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.xmlgraphics.image.loader.impl.imageio.ImageIOUtil;
+import org.ghost4j.document.PDFDocument;
+import org.ghost4j.renderer.RendererException;
+import org.ghost4j.renderer.SimpleRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -32,19 +39,27 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BarcodeQRCode;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.ByteBuffer;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfFileSpecification;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPage;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import ai.api.AIConfiguration;
 import ai.api.AIConfiguration.SupportedLanguages;
@@ -63,7 +78,7 @@ public class Library {
     @CrossOrigin
     @RequestMapping(value = "/getlabel", method = RequestMethod.POST, consumes = "application/json; charset=UTF-8",produces = "application/json; charset=UTF-8")
     
-    public HttpResponse createlabel(@RequestBody Request request) throws DocumentException, IOException {
+    public String createlabel(@RequestBody Request request) throws DocumentException, IOException, RendererException, org.ghost4j.document.DocumentException {
     	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     	Document document = null;
 		document = new Document(PageSize.LETTER.rotate(), 30.0f, 30.0f, 30.0f,
@@ -92,6 +107,7 @@ public class Library {
 
 		if (document != null && document.isOpen())
 			document.close();
+		
 		writer.close();
 		
 		
@@ -108,8 +124,17 @@ public class Library {
 		} finally {
 		    fos.close();
 		}
-		
-		
+		PDDocument document1 = PDDocument.load(new File("dineesh.pdf"));
+		PDFRenderer pdfRenderer = new PDFRenderer(document1);
+		for (int page = 0; page < document1.getNumberOfPages(); ++page)
+		{ 
+		    BufferedImage bim = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
+
+		    // suffix in filename will be used as the file format
+		    org.apache.pdfbox.tools.imageio.ImageIOUtil.writeImage(bim, "dineesh" + "-" + (page+1) + ".bmp", 300);
+		    ImageIO.write(bim, "bmp", outputStream);
+		}
+		document1.close();
 		HttpResponse POSTresponse = null;	
 
 		try {
@@ -125,9 +150,10 @@ public class Library {
 					HttpEntity resEntity = POSTresponse.getEntity();
 					EntityUtils.consume(resEntity);
 					} catch (Exception e) {
+						return "pdf not printed";
 					}
 
-		return POSTresponse;
+		return "pdf printed";
 
 
         
