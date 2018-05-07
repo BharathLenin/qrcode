@@ -78,7 +78,7 @@ public class Library {
     @CrossOrigin
     @RequestMapping(value = "/getlabel", method = RequestMethod.POST, consumes = "application/json; charset=UTF-8",produces = "application/json; charset=UTF-8")
     
-    public String createlabel(@RequestBody Request request) throws DocumentException, IOException, RendererException, org.ghost4j.document.DocumentException {
+    public String createlabel(@RequestBody Request request) throws DocumentException, IOException {
     	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     	Document document = null;
 		document = new Document(PageSize.LETTER.rotate(), 30.0f, 30.0f, 30.0f,
